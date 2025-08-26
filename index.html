@@ -30,41 +30,68 @@
       // Add more here...
     ];
 
-    async function loadStatuses() {
-      const grid = document.getElementById("statusGrid");
-      grid.innerHTML = ""; // clear
+async function loadStatuses() {
+  const grid = document.getElementById("statusGrid");
+  grid.innerHTML = "";
 
-      for (let company of companies) {
-        try {
-          let res = await fetch(company.url);
-          let data = await res.json();
-          let status = data.status?.description || "Unknown";
-          let indicator = data.status?.indicator || "unknown";
+  for (let company of companies) {
+    try {
+      let fetchUrl = company.url;
 
-          let colorClass =
-            indicator === "none" ? "green" :
-            indicator === "minor" ? "yellow" :
-            indicator === "major" || indicator === "critical" ? "red" : "";
-
-          grid.innerHTML += `
-            <div class="card">
-              <h2>${company.name}</h2>
-              <p class="status ${colorClass}">${status}</p>
-              <a href="${data.page.url}" target="_blank">View Details</a>
-            </div>
-          `;
-        } catch (err) {
-          grid.innerHTML += `
-            <div class="card">
-              <h2>${company.name}</h2>
-              <p class="status red">Error loading status</p>
-            </div>
-          `;
-        }
+      // Use CORS proxy for non-Statuspage.io APIs
+      if (company.type !== "statuspage") {
+        fetchUrl = "https://cors-anywhere.herokuapp.com/" + company.url;
       }
-    }
 
-    loadStatuses();
+      const res = await fetch(fetchUrl);
+      const data = await res.json();
+
+      let status, indicator;
+
+      if (company.type === "statuspage") {
+        status = data.status?.description || "Unknown";
+        indicator = data.status?.indicator || "unknown";
+      } else if (company.type === "slack") {
+        status = data.status === "ok" ? "Operational" : "Incident";
+        indicator = data.status === "ok" ? "none" : "major";
+      }
+
+      // Build card
+      let colorClasses = {
+        none: "bg-green-100 text-green-800",
+        minor: "bg-yellow-100 text-yellow-800",
+        major: "bg-orange-100 text-orange-800",
+        critical: "bg-red-100 text-red-800",
+        unknown: "bg-gray-100 text-gray-800"
+      };
+      let badgeClass = colorClasses[indicator] || colorClasses.unknown;
+
+      grid.innerHTML += `
+        <div class="bg-white shadow-md rounded-xl p-6">
+          <h2 class="text-lg font-semibold text-gray-900">${company.name}</h2>
+          <p class="mt-2">
+            <span class="inline-block px-3 py-1 text-sm font-medium rounded-full ${badgeClass}">
+              ${status}
+            </span>
+          </p>
+          <div class="mt-4">
+            <a href="${company.url}" target="_blank" class="text-blue-500 hover:underline">View Details</a>
+          </div>
+        </div>
+      `;
+    } catch (err) {
+      console.error(`Failed to fetch ${company.name}`, err);
+      grid.innerHTML += `
+        <div class="bg-white shadow-md rounded-xl p-6">
+          <h2 class="text-lg font-semibold text-gray-900">${company.name}</h2>
+          <p class="mt-2 text-red-600">Error loading status</p>
+        </div>
+      `;
+    }
+  }
+}
+
+loadStatuses();
     setInterval(loadStatuses, 60000); // refresh every 60s
   </script>
 </body>
