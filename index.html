@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Status Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f6f8; padding: 20px; }
+    h1 { text-align: center; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 20px; }
+    .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    .status { font-weight: bold; }
+    .green { color: green; }
+    .yellow { color: goldenrod; }
+    .red { color: crimson; }
+  </style>
+</head>
+<body>
+  <h1>Company Status Dashboard</h1>
+  <div class="grid" id="statusGrid"></div>
+
+  <script>
+    const companies = [
+      { name: "Blackthorn Events", url: "https://status.events.blackthorn.io/api/v2/status.json" },
+      { name: "GitHub", url: "https://www.githubstatus.com/api/v2/status.json" },
+      { name: "Atlassian", url: "https://status.atlassian.com/api/v2/status.json" }
+      // Add more here...
+    ];
+
+    async function loadStatuses() {
+      const grid = document.getElementById("statusGrid");
+      grid.innerHTML = ""; // clear
+
+      for (let company of companies) {
+        try {
+          let res = await fetch(company.url);
+          let data = await res.json();
+          let status = data.status?.description || "Unknown";
+          let indicator = data.status?.indicator || "unknown";
+
+          let colorClass =
+            indicator === "none" ? "green" :
+            indicator === "minor" ? "yellow" :
+            indicator === "major" || indicator === "critical" ? "red" : "";
+
+          grid.innerHTML += `
+            <div class="card">
+              <h2>${company.name}</h2>
+              <p class="status ${colorClass}">${status}</p>
+              <a href="${data.page.url}" target="_blank">View Details</a>
+            </div>
+          `;
+        } catch (err) {
+          grid.innerHTML += `
+            <div class="card">
+              <h2>${company.name}</h2>
+              <p class="status red">Error loading status</p>
+            </div>
+          `;
+        }
+      }
+    }
+
+    loadStatuses();
+    setInterval(loadStatuses, 60000); // refresh every 60s
+  </script>
+</body>
+</html>
