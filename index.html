@@ -21,13 +21,13 @@
   <script>
     const companies = [
       { name: "Salesforce", url: "https://api.status.salesforce.com/v1/instances/USA322/status"  },
-      { name: "FormAssembly", url: "https://status.formassembly.com/api/v2/status.json" },
-      { name: "Blackthorn Events", url: "https://blackthorn.statuspage.io/api/v2/summary.json" },
-      { name: "Conga", url: "https://status.conga.com/api/v2/status.json" },
-      { name: "Mogli (Twilio)", url: "https://status.twilio.com/api/v2/status.json" },
-      { name: "ProvenWorks", url: "https://status.provenworks.com/api/v2/status.json" },
-      { name: "Slack", url: "https://slack-status.com/api/v2.0.0/current" },
-      { name: "Asana", url: "https://status.asana.com//api/v2/status.json" }
+      { name: "FormAssembly", type: "statuspage", url: "https://status.formassembly.com/api/v2/status.json" },
+      { name: "Blackthorn Events", type: "blackthorn", url: "https://blackthorn.statuspage.io/api/v2/summary.json" },
+      { name: "Conga", type: "statuspage", url: "https://status.conga.com/api/v2/status.json" },
+      { name: "Mogli (Twilio)", type: "statuspage", url: "https://status.twilio.com/api/v2/status.json" },
+      { name: "ProvenWorks", type: "statuspage", url: "https://status.provenworks.com/api/v2/status.json" },
+      { name: "Slack", type: "slack", url: "https://slack-status.com/api/v2.0.0/current" },
+      { name: "Asana", type: "statuspage", url: "https://status.asana.com//api/v2/status.json" }
       // Add more here...
     ];
 
